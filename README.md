@@ -1,0 +1,40 @@
+# Cinema Booking - Система бронирования билетов в кинотеатр
+
+## Как запустить
+
+### 1. Установка зависимостей
+```bash
+npm install
+```
+
+### 2. Настройка окружения
+Создайте файл `.env` в корне проекта:
+```env
+NUXT_PUBLIC_API_BASE=http://localhost:3001
+```
+
+### 4. Запуск в режиме разработки
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу: http://localhost:3000
+
+### 5. Сборка для продакшена
+```bash
+npm run build
+npm run preview
+```
+
+## Тестирование
+### Запуск тестов
+```bash
+# Все тесты
+npm run test
+
+# Тесты с покрытием
+npm run test:coverage
+
+# Тесты в watch режиме
+npm run test:watch
+```
