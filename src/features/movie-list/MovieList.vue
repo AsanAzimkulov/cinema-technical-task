@@ -19,15 +19,18 @@
       </div>
     </div>
     
-    <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div v-else-if="moviesList && moviesList.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <MovieCard
-        v-for="movie in data"
-        :key="movie.id"
-        :title="movie.title"
-        :meta="`${movie.lengthMinutes} мин • ${movie.year}`"
-        :poster-image="movie.posterImage"
-        :movie-id="movie.id"
+        v-for="movie in moviesList"
+        :key="movie?.id"
+        :title="movie?.title || ''"
+        :meta="`${movie?.lengthMinutes || 0} мин • ${movie?.year || ''}`"
+        :poster-image="movie?.posterImage"
+        :movie-id="movie?.id"
       />
+    </div>
+    <div v-else class="text-center py-12">
+      <p class="text-caption text-[#C1C1C1]">Нет записей</p>
     </div>
   </div>
 </template>
@@ -45,4 +48,9 @@ useHead({
 })
 
 const { data, isPending: pending, error } = useMoviesQuery()
+const moviesList = computed(() => {
+  console.log('value: ', JSON.stringify({valust: data.value}))
+  if (!data.value || !Array.isArray(data.value)) return []
+  return data.value;
+})
 </script>

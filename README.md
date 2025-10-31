@@ -12,7 +12,7 @@ npm install
 ### 2. Настройка окружения
 Создайте файл `.env` в корне проекта:
 ```env
-NUXT_PUBLIC_API_BASE=http://localhost:3001
+API_BASE_URL=http://localhost:3022
 ```
 
 ### 4. Запуск в режиме разработки

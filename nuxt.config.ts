@@ -27,11 +27,6 @@ export default defineNuxtConfig({
     '~': resolve(process.cwd(), 'src'),
     '@': resolve(process.cwd(), 'src')
   },
-  runtimeConfig: {
-    public: {
-      API_ENDPOINT: process.env.API_ENDPOINT || 'http://localhost:3022'
-    }
-  },
   typescript: {
     strict: true,
     typeCheck: false

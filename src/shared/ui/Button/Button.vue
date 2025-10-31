@@ -1,7 +1,7 @@
 <template>
   <button
     :class="[
-      'btn inline-flex items-center justify-center rounded-sm px-4 py-2 border text-body',
+      'btn inline-flex items-center justify-center rounded-sm px-4 py-2 border text-body cursor-pointer',
       variantClass,
       block ? 'w-full' : ''
     ]"

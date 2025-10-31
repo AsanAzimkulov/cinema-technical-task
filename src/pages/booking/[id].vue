@@ -6,7 +6,7 @@
     <section class="py-8">
       <div v-if="!authStore.isAuthenticated" class="text-center py-12">
         <p class="text-body mb-4">Для бронирования билетов необходимо войти в систему</p>
-        <NuxtLink to="/auth/login" class="btn btn-primary">Войти</NuxtLink>
+        <NuxtLink to="/auth/login" class="btn btn-primary cursor-pointer">Войти</NuxtLink>
       </div>
       <template v-else>
       <div class="text-caption text-[#C1C1C1] mb-6">Зал 1 • 12:45</div>
@@ -28,7 +28,7 @@
               <span class="inline-block w-4 h-4 bg-[#B76969] rounded-sm"></span> Выбрано
             </div>
           </div>
-          <button class="btn btn-primary w-full">Забронировать</button>
+          <button class="btn btn-primary w-full cursor-pointer">Забронировать</button>
         </aside>
       </div>
       </template>

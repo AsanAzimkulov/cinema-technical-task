@@ -6,7 +6,7 @@
     <div class="text-body mb-2">{{ title }}</div>
     <div class="text-caption text-[#C1C1C1] mb-4">{{ meta }}</div>
     <slot name="actions">
-      <NuxtLink :to="`/movies/${movieId}`" class="btn btn-primary w-full block text-center">Купить билет</NuxtLink>
+      <NuxtLink :to="`/movies/${movieId}`" class="btn btn-primary w-full block text-center cursor-pointer">Купить билет</NuxtLink>
     </slot>
   </div>
   
@@ -25,6 +25,9 @@ const { public: { API_ENDPOINT } } = useRuntimeConfig()
 const posterSrc = computed(() => {
   if (!props.posterImage) return ''
   if (/^https?:\/\//i.test(props.posterImage)) return props.posterImage
-  return `${API_ENDPOINT}${props.posterImage}`
+  const baseUrl = API_ENDPOINT || 'http://localhost:3022'
+  // Убеждаемся, что путь начинается с /
+  const imagePath = props.posterImage.startsWith('/') ? props.posterImage : `/${props.posterImage}`
+  return `${baseUrl}${imagePath}`
 })
 </script>

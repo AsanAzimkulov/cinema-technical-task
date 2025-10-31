@@ -3,11 +3,25 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { Booking, PaymentResponse } from '@/shared/api/types'
 
 export function fetchUserBookings() {
-  return apiInstance.get<Booking[]>('/me/bookings').then(r => r.data)
+  return apiInstance.get<Booking[]>('/me/bookings')
+    .then(r => r.data ?? [])
+    .catch((error) => {
+      if (error.response?.status === 404) {
+        return []
+      }
+      throw error
+    })
 }
 
 export function useUserBookingsQuery() {
-  return useQuery({ queryKey: ['bookings'], queryFn: fetchUserBookings })
+  return useQuery({ 
+    queryKey: ['bookings'], 
+    queryFn: fetchUserBookings,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 404) return false
+      return failureCount < 2
+    }
+  })
 }
 
 export function usePayBookingMutation() {

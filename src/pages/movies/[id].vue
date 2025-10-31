@@ -10,9 +10,9 @@
         <div v-if="sessionsList.length > 0" class="mb-8 grid grid-cols-6 gap-3">
           <NuxtLink
             v-for="session in sessionsList"
-            :key="session.id"
-            :to="`/booking/${session.id}`"
-            class="px-3 py-2 rounded-sm bg-[#3B3B3B] border border-border text-center hover:bg-[#4A4A4A]"
+            :key="session?.id"
+            :to="`/booking/${session?.id}`"
+            class="px-3 py-2 rounded-sm bg-[#3B3B3B] border border-border text-center hover:bg-[#4A4A4A] cursor-pointer"
           >
             {{ formatTime(session.startTime) }}
           </NuxtLink>
@@ -59,7 +59,10 @@ const { public: { API_ENDPOINT } } = useRuntimeConfig()
 
 const getPosterUrl = (posterImage: string) => {
   if (/^https?:\/\//i.test(posterImage)) return posterImage
-  return `${API_ENDPOINT}${posterImage}`
+  const baseUrl = API_ENDPOINT || 'http://localhost:3022'
+  // Убеждаемся, что путь начинается с /
+  const imagePath = posterImage.startsWith('/') ? posterImage : `/${posterImage}`
+  return `${baseUrl}${imagePath}`
 }
 
 const formatTime = (dateTime: string) => {

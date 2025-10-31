@@ -6,7 +6,7 @@
     <section class="py-8 max-w-md mx-auto">
       <RegisterForm />
       <div class="text-caption text-[#C1C1C1] text-center mt-4">
-        Уже есть аккаунт? <NuxtLink to="/auth/login" class="text-blue-500 hover:text-blue-400">Войти</NuxtLink>
+        Уже есть аккаунт? <NuxtLink to="/auth/login" class="text-blue-500 hover:text-blue-400 cursor-pointer">Войти</NuxtLink>
       </div>
     </section>
   </NuxtLayout>

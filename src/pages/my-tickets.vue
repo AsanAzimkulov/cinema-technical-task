@@ -23,7 +23,7 @@
                   </div>
                   <button
                     v-if="booking.timeLeft && booking.timeLeft > 0"
-                    class="btn btn-primary"
+                    class="btn btn-primary cursor-pointer"
                     @click="handlePay(booking.id)"
                     :disabled="isPaying"
                   >
