@@ -1,31 +1,32 @@
-import { useQuery } from '@tanstack/vue-query'
 import { apiInstance } from '@/shared/api/instance'
+import { useQuery } from '@tanstack/vue-query'
+import { computed, type MaybeRef } from 'vue'
 import type { Cinema, MovieSession } from '@/shared/api/types'
 
-export const cinemasKeys = {
-  all: ['cinemas'] as const,
-  sessions: (cinemaId: number) => ['cinemas', cinemaId, 'sessions'] as const
+export function fetchCinemas() {
+  return apiInstance.get<Cinema[]>('/cinemas').then(r => r.data)
 }
 
 export function useCinemasQuery() {
-  return useQuery({
-    queryKey: cinemasKeys.all,
-    queryFn: async (): Promise<Cinema[]> => {
-      const { data } = await apiInstance.get<Cinema[]>('/cinemas')
-      return data
-    }
-  })
+  return useQuery({ queryKey: ['cinemas'], queryFn: fetchCinemas })
 }
 
-export function useCinemaSessionsQuery(cinemaId: number) {
-  return useQuery({
-    queryKey: cinemasKeys.sessions(cinemaId),
-    queryFn: async (): Promise<MovieSession[]> => {
-      const { data } = await apiInstance.get<MovieSession[]>(`/cinemas/${cinemaId}/sessions`)
-      return data
-    },
-    enabled: !!cinemaId
-  })
+export function fetchCinemaSessions(cinemaId: number) {
+  if (!cinemaId || isNaN(cinemaId)) {
+    throw new Error('Invalid cinemaId')
+  }
+  return apiInstance.get<MovieSession[]>(`/cinemas/${cinemaId}/sessions`).then(r => r.data)
 }
 
-
+export function useCinemaSessionsQuery(cinemaId: MaybeRef<number>) {
+  const id = computed(() => {
+    const value = typeof cinemaId === 'function' ? cinemaId() : cinemaId
+    return Number(value) || 0
+  })
+  
+  return useQuery({
+    queryKey: computed(() => ['cinemas', id.value, 'sessions']),
+    queryFn: () => fetchCinemaSessions(id.value),
+    enabled: computed(() => !!id.value && id.value > 0)
+  })
+}

@@ -6,30 +6,30 @@
     
     <form @submit.prevent="onSubmit" class="space-y-6">
       <FormInput
-        v-model="formData.username"
+        v-model="username"
         label="Имя пользователя"
         placeholder="Введите имя пользователя"
-        :error="errors.username"
-        hint="Минимум 8 символов"
+        :error="errors?.username as string | undefined"
+        message="Минимум 8 символов"
         required
       />
       
       <FormInput
-        v-model="formData.password"
+        v-model="password"
         type="password"
         label="Пароль"
         placeholder="Введите пароль"
-        :error="errors.password"
-        hint="Минимум 8 символов, 1 заглавная буква и 1 цифра"
+        :error="errors?.password as string | undefined"
+        message="Минимум 8 символов, 1 заглавная буква и 1 цифра"
         required
       />
       
       <FormInput
-        v-model="formData.passwordConfirmation"
+        v-model="passwordConfirmation"
         type="password"
         label="Подтверждение пароля"
         placeholder="Подтвердите пароль"
-        :error="errors.passwordConfirmation"
+        :error="errors?.passwordConfirmation as string | undefined"
         required
       />
       
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { registerSchema, type RegisterFormData } from '~/shared/lib/validation'
@@ -78,7 +78,7 @@ import FormInput from '~/shared/ui/Form/FormInput.vue'
 const authStore = useAuthStore()
 const errorMessage = ref('')
 
-const { handleSubmit, defineField, errors, isValid } = useForm({
+const { handleSubmit, defineField, errors, values, meta } = useForm({
   validationSchema: toTypedSchema(registerSchema)
 })
 
@@ -86,19 +86,15 @@ const [username] = defineField('username')
 const [password] = defineField('password')
 const [passwordConfirmation] = defineField('passwordConfirmation')
 
-const formData = reactive({
-  username: username,
-  password: password,
-  passwordConfirmation: passwordConfirmation
+const isLoading = computed(() => authStore.isLoading)
+const isFormValid = computed(() => {
+  return meta.value.valid && !!values.username && !!values.password && !!values.passwordConfirmation
 })
 
-const isLoading = computed(() => authStore.isLoading)
-const isFormValid = computed(() => isValid.value && formData.username && formData.password && formData.passwordConfirmation)
-
-const handleFormSubmit = async (values: RegisterFormData) => {
+const handleFormSubmit = async (formValues: RegisterFormData) => {
   try {
     errorMessage.value = ''
-    await authStore.register(values.username, values.password)
+    await authStore.register(formValues.username, formValues.password)
     await navigateTo('/my-tickets')
   } catch (error: any) {
     errorMessage.value = error.message || 'Ошибка при регистрации. Попробуйте еще раз.'

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, readonly } from 'vue'
 import type { User } from '../api/types'
-import { apiClient } from '../api/client'
+import { login as loginApi, register as registerApi } from '../api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -13,7 +13,6 @@ export const useAuthStore = defineStore('auth', () => {
   const setAuth = (userData: User, authToken: string) => {
     user.value = userData
     token.value = authToken
-    apiClient.setToken(authToken)
     
     // Store in localStorage for persistence
     if (process.client) {
@@ -25,7 +24,6 @@ export const useAuthStore = defineStore('auth', () => {
   const clearAuth = () => {
     user.value = null
     token.value = null
-    apiClient.setToken(null)
     
     if (process.client) {
       localStorage.removeItem('auth_token')
@@ -52,18 +50,21 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (username: string, password: string) => {
     isLoading.value = true
     try {
-      const response = await apiClient.login({ username, password })
+      const response = await loginApi({ username, password })
       
       // Create user object from username (API doesn't return full user data)
       const userData: User = {
-        id: 0, // Will be updated when we get user data
+        id: 0,
         name: username,
         password_hash: ''
       }
       
       setAuth(userData, response.token)
       return response
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Неверный логин или пароль. Проверьте введенные данные и попробуйте снова')
+      }
       throw error
     } finally {
       isLoading.value = false
@@ -73,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
   const register = async (username: string, password: string) => {
     isLoading.value = true
     try {
-      const response = await apiClient.register({ username, password })
+      const response = await registerApi({ username, password })
       
       // Create user object from username
       const userData: User = {
@@ -84,7 +85,10 @@ export const useAuthStore = defineStore('auth', () => {
       
       setAuth(userData, response.token)
       return response
-    } catch (error) {
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
       throw error
     } finally {
       isLoading.value = false
@@ -93,6 +97,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = () => {
     clearAuth()
+    if (process.client) {
+      navigateTo('/')
+    }
   }
 
   return {

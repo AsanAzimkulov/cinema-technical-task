@@ -6,19 +6,19 @@
     
     <form @submit.prevent="onSubmit" class="space-y-6">
       <FormInput
-        v-model="formData.username"
+        v-model="username"
         label="Имя пользователя"
         placeholder="Введите имя пользователя"
-        :error="errors.username"
+        :error="errors?.username as string | undefined"
         required
       />
       
       <FormInput
-        v-model="formData.password"
+        v-model="password"
         type="password"
         label="Пароль"
         placeholder="Введите пароль"
-        :error="errors.password"
+        :error="errors?.password as string | undefined"
         required
       />
       
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, computed, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { loginSchema, type LoginFormData } from '~/shared/lib/validation'
@@ -67,28 +67,25 @@ import FormInput from '~/shared/ui/Form/FormInput.vue'
 const authStore = useAuthStore()
 const errorMessage = ref('')
 
-const { handleSubmit, defineField, errors, isValid } = useForm({
+const { handleSubmit, defineField, errors, values, meta } = useForm({
   validationSchema: toTypedSchema(loginSchema)
 })
 
-const [username] = defineField('username')
-const [password] = defineField('password')
-
-const formData = reactive({
-  username: username,
-  password: password
-})
+const [username, usernameAttrs] = defineField('username')
+const [password, passwordAttrs] = defineField('password')
 
 const isLoading = computed(() => authStore.isLoading)
-const isFormValid = computed(() => isValid.value && formData.username && formData.password)
+const isFormValid = computed(() => {
+  return meta.value.valid && !!values.username && !!values.password
+})
 
-const handleFormSubmit = async (values: LoginFormData) => {
+const handleFormSubmit = async (formValues: LoginFormData) => {
   try {
     errorMessage.value = ''
-    await authStore.login(values.username, values.password)
+    await authStore.login(formValues.username, formValues.password)
     await navigateTo('/my-tickets')
   } catch (error: any) {
-    errorMessage.value = 'Неверный логин или пароль. Проверьте введенные данные и попробуйте снова.'
+    errorMessage.value = error.message || 'Неверный логин или пароль. Проверьте введенные данные и попробуйте снова.'
   }
 }
 

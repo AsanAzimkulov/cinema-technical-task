@@ -1,19 +1,11 @@
-import { useQuery } from '@tanstack/vue-query'
 import { apiInstance } from '@/shared/api/instance'
+import { useQuery } from '@tanstack/vue-query'
 import type { Settings } from '@/shared/api/types'
 
-export const settingsKeys = {
-  base: ['settings'] as const
+export function fetchSettings() {
+  return apiInstance.get<Settings>('/settings').then(r => r.data)
 }
 
 export function useSettingsQuery() {
-  return useQuery({
-    queryKey: settingsKeys.base,
-    queryFn: async (): Promise<Settings> => {
-      const { data } = await apiInstance.get<Settings>('/settings')
-      return data
-    }
-  })
+  return useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
 }
-
-

@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      API_ENDPOINT: process.env.API_ENDPOINT || 'http://localhost:3001'
+      API_ENDPOINT: process.env.API_ENDPOINT || 'http://localhost:3022'
     }
   },
   typescript: {

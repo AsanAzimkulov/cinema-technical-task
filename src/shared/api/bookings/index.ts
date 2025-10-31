@@ -1,45 +1,24 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { apiInstance } from '@/shared/api/instance'
-import type { Booking, BookingRequest, BookingResponse, PaymentResponse } from '@/shared/api/types'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import type { Booking, PaymentResponse } from '@/shared/api/types'
 
-export const bookingsKeys = {
-  me: ['me', 'bookings'] as const
+export function fetchUserBookings() {
+  return apiInstance.get<Booking[]>('/me/bookings').then(r => r.data)
 }
 
-export function useMyBookingsQuery() {
-  return useQuery({
-    queryKey: bookingsKeys.me,
-    queryFn: async (): Promise<Booking[]> => {
-      const { data } = await apiInstance.get<Booking[]>('/me/bookings')
-      return data
-    }
-  })
-}
-
-export function useBookSessionMutation(movieSessionId: number) {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: async (payload: BookingRequest): Promise<BookingResponse> => {
-      const { data } = await apiInstance.post<BookingResponse>(`/movieSessions/${movieSessionId}/bookings`, payload)
-      return data
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: bookingsKeys.me })
-    }
-  })
+export function useUserBookingsQuery() {
+  return useQuery({ queryKey: ['bookings'], queryFn: fetchUserBookings })
 }
 
 export function usePayBookingMutation() {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (bookingId: string): Promise<PaymentResponse> => {
-      const { data } = await apiInstance.post<PaymentResponse>(`/bookings/${bookingId}/payments`)
-      return data
+      const response = await apiInstance.post<PaymentResponse>(`/bookings/${bookingId}/payments`)
+      return response.data
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: bookingsKeys.me })
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
     }
   })
 }
-
-

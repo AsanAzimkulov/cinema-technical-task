@@ -1,20 +1,41 @@
-import { useQuery } from '@tanstack/vue-query'
 import { apiInstance } from '@/shared/api/instance'
-import type { MovieSessionDetails } from '@/shared/api/types'
+import { useQuery } from '@tanstack/vue-query'
+import { computed, type MaybeRef } from 'vue'
+import type { MovieSession, MovieSessionDetails, BookingRequest, BookingResponse } from '@/shared/api/types'
 
-export const sessionsKeys = {
-  details: (id: number) => ['sessions', id, 'details'] as const
+export function fetchMovieSessions(movieId: number) {
+  if (!movieId || isNaN(movieId)) {
+    throw new Error('Invalid movieId')
+  }
+  return apiInstance.get<MovieSession[]>(`/movies/${movieId}/sessions`).then(r => r.data)
 }
 
-export function useSessionDetailsQuery(id: number) {
+export function useMovieSessionsQuery(movieId: MaybeRef<number>) {
+  const id = computed(() => {
+    const value = typeof movieId === 'function' ? movieId() : movieId
+    return Number(value) || 0
+  })
+  
   return useQuery({
-    queryKey: sessionsKeys.details(id),
-    queryFn: async (): Promise<MovieSessionDetails> => {
-      const { data } = await apiInstance.get<MovieSessionDetails>(`/movieSessions/${id}`)
-      return data
-    },
-    enabled: !!id
+    queryKey: computed(() => ['movies', id.value, 'sessions']),
+    queryFn: () => fetchMovieSessions(id.value),
+    enabled: computed(() => !!id.value && id.value > 0)
   })
 }
 
+export function fetchMovieSessionDetails(movieSessionId: number) {
+  return apiInstance.get<MovieSessionDetails>(`/movieSessions/${movieSessionId}`).then(r => r.data)
+}
 
+export function useMovieSessionDetailsQuery(movieSessionId: number) {
+  return useQuery({
+    queryKey: ['movieSessions', movieSessionId],
+    queryFn: () => fetchMovieSessionDetails(movieSessionId),
+    enabled: !!movieSessionId
+  })
+}
+
+export async function createBooking(movieSessionId: number, data: BookingRequest): Promise<BookingResponse> {
+  const response = await apiInstance.post<BookingResponse>(`/movieSessions/${movieSessionId}/bookings`, data)
+  return response.data
+}
